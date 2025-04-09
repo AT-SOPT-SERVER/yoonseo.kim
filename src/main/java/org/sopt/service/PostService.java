@@ -11,6 +11,7 @@ public class PostService {
 
     public void createPost(String title) {
         validateTitle(title);
+        checkDuplicateTitle(title);
         Post post = new Post(postId++, title);
         postRepository.save(post);
     }
@@ -28,7 +29,7 @@ public class PostService {
         if (post == null) {
             throw new IllegalArgumentException("해당 ID의 게시글이 존재하지 않습니다.");
         }
-        if (!validateTitle(title)) return;
+        if (!validateTitle(title) || !checkDuplicateTitle(title)) return;
         getPostById(id).setTitle(title);
     }
 
@@ -42,6 +43,15 @@ public class PostService {
         }
         if (title.length() > 30) {
             throw new IllegalArgumentException("제목은 최대 30자까지 가능합니다.");
+        }
+        return true;
+    }
+
+    private boolean checkDuplicateTitle(String title) {
+        for (Post post : postRepository.findAll()) {
+            if (post.getTitle().equals(title)) {
+                throw new IllegalArgumentException("이미 존재하는 게시글 제목입니다.");
+            }
         }
         return true;
     }
