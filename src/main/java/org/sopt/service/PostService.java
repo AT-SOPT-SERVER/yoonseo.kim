@@ -2,17 +2,17 @@ package org.sopt.service;
 
 import org.sopt.domain.Post;
 import org.sopt.repository.PostRepository;
+import org.sopt.util.IdGenerator;
 
 import java.util.List;
 
 public class PostService {
     private PostRepository postRepository = new PostRepository();
-    private int postId = 1;
 
     public void createPost(String title) {
         validateTitle(title);
         checkDuplicateTitle(title);
-        Post post = new Post(postId++, title);
+        Post post = new Post(IdGenerator.generatePostId(), title);
         postRepository.save(post);
     }
 
