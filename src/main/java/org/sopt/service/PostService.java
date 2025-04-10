@@ -19,7 +19,7 @@ public class PostService {
             LocalDateTime now = LocalDateTime.now();
 
             long secondsBetween = Duration.between(lastCreatedAt, now).getSeconds();
-            if (secondsBetween < 180) {
+            if (secondsBetween < 2) {
                 throw new IllegalArgumentException("새로운 게시글은 마지막 게시글 작성 이후 3분 뒤에 작성할 수 있습니다.");
             }
         }
@@ -48,6 +48,10 @@ public class PostService {
 
     public boolean deletePostById(int id) {
         return postRepository.deletePostById(id);
+    }
+
+    public List<Post> searchPostByKeyword(String keyword) {
+        return postRepository.searchPostByKeyword(keyword);
     }
 
     private boolean validateTitle(String title) {

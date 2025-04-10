@@ -34,4 +34,17 @@ public class PostRepository {
         }
         return false;
     }
+
+    public List<Post> searchPostByKeyword(String keyword) {
+        List<Post> searchResult = new ArrayList<>();
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return searchResult;
+        }
+        for (Post post : postList) {
+            if (post.getTitle() != null && post.getTitle().toLowerCase().contains(keyword)) {
+                searchResult.add(post);
+            }
+        }
+        return searchResult;
+    }
 }

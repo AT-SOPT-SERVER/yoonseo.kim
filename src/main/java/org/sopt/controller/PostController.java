@@ -36,6 +36,14 @@ public class PostController {
         }
     }
 
+    public List<Post> searchPostsByKeyword(String keyword) {
+        try {
+            return postService.searchPostByKeyword(keyword);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     public boolean deletePostById(int id) {
         return postService.deletePostById(id);
     }
