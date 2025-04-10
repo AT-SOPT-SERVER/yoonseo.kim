@@ -41,6 +41,7 @@ public class PostRepository {
         if (keyword == null || keyword.trim().isEmpty()) {
             return searchResult;
         }
+
         for (Post post : postList) {
             if (post.getTitle() != null && post.getTitle().toLowerCase().contains(keyword)) {
                 searchResult.add(post);
@@ -52,7 +53,7 @@ public class PostRepository {
     public void savePostsToFile(String path) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(path))) {
             for (Post post : postList) {
-                writer.write(post.getId() + "," + post.getTitle() + "," + post.getCreatedAt().toString());
+                writer.write(post.getId() + ", " + post.getTitle() + ", " + post.getCreatedAt().toString());
                 writer.newLine();
             }
         }
