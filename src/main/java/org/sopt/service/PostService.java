@@ -5,6 +5,7 @@ import org.sopt.repository.PostRepository;
 import org.sopt.util.IdGenerator;
 
 import java.io.IOException;
+import java.text.BreakIterator;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -67,7 +68,16 @@ public class PostService {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("제목이 비어 있습니다.");
         }
-        if (title.length() > 30) {
+
+        BreakIterator charIterator = BreakIterator.getCharacterInstance();
+        charIterator.setText(title);
+        int titleLength = 0;
+        for (int titleScope = charIterator.first();
+             titleScope != BreakIterator.DONE;
+             titleScope = charIterator.next()) {
+                titleLength++;
+        }
+        if (titleLength > 30) {
             throw new IllegalArgumentException("제목은 최대 30자까지 가능합니다.");
         }
         return true;
