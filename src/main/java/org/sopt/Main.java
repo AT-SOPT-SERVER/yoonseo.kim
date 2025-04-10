@@ -57,26 +57,34 @@ public class Main {
                 case "4":
                     System.out.println("\n✏️ [게시글 수정]");
                     System.out.print("📌 수정할 게시글 ID를 입력해주세요: ");
-                    int updateId = Integer.parseInt(scanner.nextLine());
-                    System.out.print("📝 새 제목을 입력해주세요: ");
-                    String newTitle = scanner.nextLine();
-                    boolean updated = controller.updatePostTitle(updateId, newTitle);
-                    if (updated) {
-                        System.out.println("✅ 게시글이 성공적으로 수정되었습니다.");
-                    } else {
-                        System.out.println("❌ 게시글 수정에 실패하였습니다.");
+                    try {
+                        int updateId = Integer.parseInt(scanner.nextLine());
+                        System.out.print("📝 새 제목을 입력해주세요: ");
+                        String newTitle = scanner.nextLine();
+                        boolean updated = controller.updatePostTitle(updateId, newTitle);
+                        if (updated) {
+                            System.out.println("✅ 게시글이 성공적으로 수정되었습니다.");
+                        } else {
+                            System.out.println("❌ 게시글 수정에 실패하였습니다.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("❗️유효한 숫자 형식의 ID를 입력해주세요.");
                     }
                     break;
 
                 case "5":
                     System.out.println("\n🗑️ [게시글 삭제]");
                     System.out.print("📌 삭제할 게시글 ID를 입력해주세요: ");
-                    int deleteId = Integer.parseInt(scanner.nextLine());
-                    boolean deleted = controller.deletePostById(deleteId);
-                    if (deleted) {
-                        System.out.println("🗑️ 게시글이 성공적으로 삭제되었습니다.");
-                    } else {
-                        System.out.println("❌ 삭제할 게시글이 존재하지 않습니다.");
+                    try {
+                        int deleteId = Integer.parseInt(scanner.nextLine());
+                        boolean deleted = controller.deletePostById(deleteId);
+                        if (deleted) {
+                            System.out.println("🗑️ 게시글이 성공적으로 삭제되었습니다.");
+                        } else {
+                            System.out.println("❌ 삭제할 게시글이 존재하지 않습니다.");
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("❗️유효한 숫자 형식의 ID를 입력해주세요.");
                     }
                     break;
 
