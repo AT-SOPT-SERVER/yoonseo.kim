@@ -4,6 +4,7 @@ import org.sopt.domain.Post;
 import org.sopt.repository.PostRepository;
 import org.sopt.util.IdGenerator;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -50,8 +51,16 @@ public class PostService {
         return postRepository.deletePostById(id);
     }
 
-    public List<Post> searchPostByKeyword(String keyword) {
-        return postRepository.searchPostByKeyword(keyword);
+    public List<Post> searchPostsByKeyword(String keyword) {
+        return postRepository.searchPostsByKeyword(keyword);
+    }
+
+    public void savePosts(String path) throws IOException {
+        postRepository.savePostsToFile(path);
+    }
+
+    public List<String> loadPosts(String path) throws IOException {
+        return postRepository.loadPostsFromFile(path);
     }
 
     private boolean validateTitle(String title) {

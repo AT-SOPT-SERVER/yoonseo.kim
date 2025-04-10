@@ -103,6 +103,20 @@ public class Main {
                     }
                     break;
 
+                case "7":
+                    System.out.println("\n📁 [게시글 파일로 저장]");
+                    System.out.print("저장할 파일 경로를 입력해주세요: ");
+                    String savePath = scanner.nextLine();
+                    controller.savePostsToFile(savePath);
+                    break;
+
+                case "8":
+                    System.out.println("\n📂 [게시글 파일 불러오기]");
+                    System.out.print("불러올 파일 경로를 입력해주세요: ");
+                    String loadPath = scanner.nextLine();
+                    controller.loadPostsFromFile(loadPath);
+                    break;
+
                 case "0":
                     System.out.println("\n👋 프로그램을 종료합니다. 감사합니다!");
                     return;
@@ -127,6 +141,8 @@ public class Main {
         System.out.println("4️⃣  게시글 수정");
         System.out.println("5️⃣  게시글 삭제");
         System.out.println("6️⃣  게시글 검색");
+        System.out.println("7️⃣  게시글 파일로 저장");
+        System.out.println("8️⃣  게시글 파일 불러오기");
         System.out.println("0️⃣  프로그램 종료");
         System.out.println("=====================================");
     }

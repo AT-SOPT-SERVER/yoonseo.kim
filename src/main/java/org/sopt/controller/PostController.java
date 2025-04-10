@@ -38,7 +38,7 @@ public class PostController {
 
     public List<Post> searchPostsByKeyword(String keyword) {
         try {
-            return postService.searchPostByKeyword(keyword);
+            return postService.searchPostsByKeyword(keyword);
         } catch (IllegalArgumentException e) {
             return null;
         }
@@ -46,5 +46,29 @@ public class PostController {
 
     public boolean deletePostById(int id) {
         return postService.deletePostById(id);
+    }
+
+    public void savePostsToFile(String path) {
+        try {
+            postService.savePosts(path);
+            System.out.println("게시글 파일 저장에 성공했습니다.");
+        } catch (Exception e) {
+            System.out.println("게시글 파일 저장 실패: " + e.getMessage());
+        }
+    }
+
+    public void loadPostsFromFile(String path) {
+        try {
+            List<String> postList = postService.loadPosts(path);
+            if (postList.isEmpty()) {
+                System.out.println("파일에 저장된 내용이 없습니다.");
+            } else {
+                for (String postLine : postList) {
+                    System.out.println(postLine);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("파일 불러오기 실패: " + e.getMessage());
+        }
     }
 }
