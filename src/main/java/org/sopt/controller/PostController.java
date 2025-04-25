@@ -1,74 +1,64 @@
 package org.sopt.controller;
 
-import org.sopt.domain.Post;
+import org.sopt.base.BaseResponse;
+import org.sopt.dto.request.PostRequest;
+import org.sopt.dto.response.PostResponse;
 import org.sopt.service.PostService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
+@RequestMapping("/api/v1/posts")
 public class PostController {
-    private PostService postService = new PostService();
+    private final PostService postService;
 
-    public boolean createPost(final String title) {
-        try {
-            postService.createPost(title);
-            return true;
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return false;
-        }
+    public PostController(PostService postService) {
+        this.postService = postService;
     }
 
-    public List<Post> getAllPosts() {
-        return postService.getAllPosts();
+    @PostMapping
+    public ResponseEntity<BaseResponse<Void>> createPost(@RequestBody final PostRequest request) {
+        postService.createPost(request.title());
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(BaseResponse.success(201, null));
     }
 
-    public Post getPostById(int id) {
-        return postService.getPostById(id);
+    @GetMapping
+    public ResponseEntity<BaseResponse<List<PostResponse>>> getAllPosts() {
+        return ResponseEntity
+                .ok(BaseResponse.success(postService.getAllPosts()));
     }
 
-    public boolean updatePostTitle(int id, String title) {
-        try {
-            postService.editPostById(id, title);
-            return true;
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-            return false;
-        }
+    @GetMapping("/{postId}")
+    public ResponseEntity<BaseResponse<PostResponse>> getPostById(@PathVariable final Long postId) {
+        return ResponseEntity
+                .ok(BaseResponse.success(postService.getPostById(postId)));
     }
 
-    public List<Post> searchPostsByKeyword(String keyword) {
-        try {
-            return postService.searchPostsByKeyword(keyword);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+    @PutMapping("/{postId}")
+    public ResponseEntity<BaseResponse<Void>> updatePostTitle(
+        @PathVariable final Long postId,
+        @RequestBody final PostRequest request
+    ) {
+        postService.updatePost(postId, request.title());
+        return ResponseEntity
+                .ok(BaseResponse.success(null));
     }
 
-    public boolean deletePostById(int id) {
-        return postService.deletePostById(id);
+    @GetMapping("/search")
+    public ResponseEntity<BaseResponse<List<PostResponse>>> searchPostsByKeyword(@RequestParam final String keyword) {
+        return ResponseEntity
+                .ok(BaseResponse.success(postService.searchPostsByKeyword(keyword)));
     }
 
-    public void savePostsToFile(String path) {
-        try {
-            postService.savePosts(path);
-            System.out.println("게시글 파일 저장에 성공했습니다.");
-        } catch (Exception e) {
-            System.out.println("게시글 파일 저장 실패: " + e.getMessage());
-        }
-    }
-
-    public void loadPostsFromFile(String path) {
-        try {
-            List<String> postList = postService.loadPosts(path);
-            if (postList.isEmpty()) {
-                System.out.println("파일에 저장된 내용이 없습니다.");
-            } else {
-                for (String postLine : postList) {
-                    System.out.println(postLine);
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("파일 불러오기 실패: " + e.getMessage());
-        }
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<BaseResponse<Void>> deletePostById(@PathVariable final Long postId) {
+        postService.deletePost(postId);
+        return ResponseEntity
+                .ok(BaseResponse.success(null));
     }
 }

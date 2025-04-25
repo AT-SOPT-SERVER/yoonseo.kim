@@ -1,76 +1,66 @@
 package org.sopt.service;
 
+import jakarta.transaction.Transactional;
 import org.sopt.domain.Post;
+import org.sopt.dto.response.PostResponse;
 import org.sopt.repository.PostRepository;
-import org.sopt.util.IdGenerator;
+import org.sopt.util.Validator;
+import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Service
 public class PostService {
-    private PostRepository postRepository = new PostRepository();
+    private final PostRepository postRepository;
+
+    public PostService(PostRepository postRepository) {
+        this.postRepository = postRepository;
+    }
 
     public void createPost(String title) {
-        List<Post> postList = postRepository.findAll();
-
-        if (!postList.isEmpty()) {
-            Post lastPost = postList.get(postList.size() - 1);
-            LocalDateTime lastCreatedAt = lastPost.getCreatedAt();
-            LocalDateTime now = LocalDateTime.now();
-
-            long secondsBetween = Duration.between(lastCreatedAt, now).getSeconds();
-            if (secondsBetween < 180) {
-                throw new IllegalArgumentException("새로운 게시글은 마지막 게시글 작성 이후 3분 뒤에 작성할 수 있습니다.");
-            }
+        Validator.validateTitle(title);
+        if (postRepository.existsByTitle(title)) {
+            throw new IllegalArgumentException("이미 존재하는 제목입니다.");
         }
-
-        checkDuplicateTitle(title);
-        Post post = new Post(IdGenerator.generatePostId(), title, LocalDateTime.now());
-        postRepository.save(post);
+        postRepository.save(new Post(title));
     }
 
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+    public List<PostResponse> getAllPosts() {
+        return postRepository.findAll().stream()
+                .map(post -> new PostResponse(post.getId(), post.getTitle()))
+                .collect(Collectors.toList());
     }
 
-    public Post getPostById(int id) {
-        return postRepository.findPostById(id);
+    public PostResponse getPostById(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID입니다."));
+        return new PostResponse(post.getId(), post.getTitle());
     }
 
-    public void editPostById(int id, String title) {
-        Post post = getPostById(id);
-        if (post == null) {
-            throw new IllegalArgumentException("해당 ID의 게시글이 존재하지 않습니다.");
+    @Transactional
+    public void updatePost(Long id, String newTitle) {
+        Validator.validateTitle(newTitle);
+        if (postRepository.existsByTitle(newTitle)) {
+            throw new IllegalArgumentException("이미 존재하는 제목입니다.");
         }
-
-        if (!checkDuplicateTitle(title)) return;
-        getPostById(id).setTitle(title);
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID입니다."));
+        post.setTitle(newTitle);
     }
 
-    public boolean deletePostById(int id) {
-        return postRepository.deletePostById(id);
+    public void deletePost(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("삭제할 게시글이 존재하지 않습니다."));
+        postRepository.delete(post);
     }
 
-    public List<Post> searchPostsByKeyword(String keyword) {
-        return postRepository.searchPostsByKeyword(keyword);
-    }
-
-    public void savePosts(String path) throws IOException {
-        postRepository.savePostsToFile(path);
-    }
-
-    public List<String> loadPosts(String path) throws IOException {
-        return postRepository.loadPostsFromFile(path);
-    }
-
-    private boolean checkDuplicateTitle(String title) {
-        for (Post post : getAllPosts()) {
-            if (post.getTitle().equals(title)) {
-                throw new IllegalArgumentException("이미 존재하는 게시글 제목입니다.");
-            }
+    public List<PostResponse> searchPostsByKeyword(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
         }
-        return true;
+        return postRepository.searchByKeyword(keyword.trim()).stream()
+                .map(post -> new PostResponse(post.getId(), post.getTitle()))
+                .collect(Collectors.toList());
     }
 }
