@@ -1,4 +1,4 @@
-package org.sopt.util;
+package org.sopt.global.util;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
