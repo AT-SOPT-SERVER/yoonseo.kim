@@ -1,11 +1,10 @@
 package org.sopt.controller;
 
-import org.sopt.base.BaseResponse;
 import org.sopt.dto.request.PostRequest;
 import org.sopt.dto.response.PostResponse;
+import org.sopt.global.common.base.BaseResponse;
+import org.sopt.global.common.response.SuccessCode;
 import org.sopt.service.PostService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,45 +19,38 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<BaseResponse<Void>> createPost(@RequestBody final PostRequest request) {
+    public BaseResponse<Void> createPost(@RequestBody final PostRequest request) {
         postService.createPost(request.title());
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(BaseResponse.success(201, null));
+        return BaseResponse.success(SuccessCode.CREATE_POST, null);
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<PostResponse>>> getAllPosts() {
-        return ResponseEntity
-                .ok(BaseResponse.success(postService.getAllPosts()));
+    public BaseResponse<List<PostResponse>> getAllPosts() {
+        return BaseResponse.success(SuccessCode.GET_ALL_POSTS, postService.getAllPosts());
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<BaseResponse<PostResponse>> getPostById(@PathVariable final Long postId) {
-        return ResponseEntity
-                .ok(BaseResponse.success(postService.getPostById(postId)));
+    public BaseResponse<PostResponse> getPostById(@PathVariable final Long postId) {
+        return BaseResponse.success(SuccessCode.GET_POST, postService.getPostById(postId));
     }
 
     @PutMapping("/{postId}")
-    public ResponseEntity<BaseResponse<Void>> updatePostTitle(
+    public BaseResponse<Void> updatePostTitle(
         @PathVariable final Long postId,
         @RequestBody final PostRequest request
     ) {
         postService.updatePost(postId, request.title());
-        return ResponseEntity
-                .ok(BaseResponse.success(null));
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<BaseResponse<List<PostResponse>>> searchPostsByKeyword(@RequestParam final String keyword) {
-        return ResponseEntity
-                .ok(BaseResponse.success(postService.searchPostsByKeyword(keyword)));
+        return BaseResponse.success(SuccessCode.UPDATE_POST, null);
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<BaseResponse<Void>> deletePostById(@PathVariable final Long postId) {
+    public BaseResponse<Void> deletePostById(@PathVariable final Long postId) {
         postService.deletePost(postId);
-        return ResponseEntity
-                .ok(BaseResponse.success(null));
+        return BaseResponse.success(SuccessCode.DELETE_POST, null);
+    }
+
+    @GetMapping("/search")
+    public BaseResponse<List<PostResponse>> searchPostsByKeyword(@RequestParam final String keyword) {
+        return BaseResponse.success(SuccessCode.SEARCH_POSTS, postService.searchPostsByKeyword(keyword));
     }
 }
