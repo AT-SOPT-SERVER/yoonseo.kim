@@ -12,6 +12,8 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
     boolean existsByTitle(String title);
 
+    boolean existsByTitleAndIdNot(String title, Long id);
+
     @Query("SELECT p FROM Post p WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Post> searchByKeyword(@Param("keyword") String keyword);
 }

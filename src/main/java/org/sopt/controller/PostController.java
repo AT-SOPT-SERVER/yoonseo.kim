@@ -19,8 +19,11 @@ public class PostController {
     }
 
     @PostMapping
-    public BaseResponse<Void> createPost(@RequestBody final PostRequest request) {
-        postService.createPost(request.title());
+    public BaseResponse<Void> createPost(
+            @RequestHeader Long userId,
+            @RequestBody final PostRequest request
+    ) {
+        postService.createPost(userId, request);
         return BaseResponse.success(SuccessCode.CREATE_POST, null);
     }
 
@@ -39,7 +42,7 @@ public class PostController {
         @PathVariable final Long postId,
         @RequestBody final PostRequest request
     ) {
-        postService.updatePost(postId, request.title());
+        postService.updatePost(postId, request);
         return BaseResponse.success(SuccessCode.UPDATE_POST, null);
     }
 

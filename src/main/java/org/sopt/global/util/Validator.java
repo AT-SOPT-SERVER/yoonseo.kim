@@ -25,6 +25,12 @@ public final class Validator {
         }
     }
 
+    public static void validateContent(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            throw new CustomException(ErrorCode.EMPTY_POST_CONTENT);
+        }
+    }
+
     private static int countGraphemeClusters(String text) {
         Matcher matcher = GRAPHEME_CLUSTER.matcher(text);
         int count = 0;
