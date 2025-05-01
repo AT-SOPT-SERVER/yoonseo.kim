@@ -1,5 +1,8 @@
 package org.sopt.global.util;
 
+import org.sopt.global.common.exception.CustomException;
+import org.sopt.global.common.exception.ErrorCode;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,18 +17,20 @@ public final class Validator {
 
     public static void validateTitle(String title) {
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("제목이 비어 있습니다.");
+            throw new CustomException(ErrorCode.EMPTY_POST_TITLE);
         }
         int length = countGraphemeClusters(title.trim());
         if (length > MAX_TITLE_LENGTH) {
-            throw new IllegalArgumentException("제목은 최대 " + MAX_TITLE_LENGTH + "자까지 가능합니다.");
+            throw new CustomException(ErrorCode.INVALID_POST_TITLE_LENGTH);
         }
     }
 
     private static int countGraphemeClusters(String text) {
         Matcher matcher = GRAPHEME_CLUSTER.matcher(text);
         int count = 0;
-        while (matcher.find()) count++;
+        while (matcher.find()) {
+            count++;
+        }
         return count;
     }
 }

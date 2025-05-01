@@ -1,26 +1,18 @@
 package org.sopt.global.common.base;
 
+import org.sopt.global.common.exception.CustomException;
 import org.sopt.global.common.exception.ErrorCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(IllegalArgumentException.class)
-    public BaseResponse<Void> handleBadRequest() {
-        ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
-        return BaseResponse.error(errorCode);
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public BaseResponse<Void> handleNotFound() {
-        ErrorCode errorCode = ErrorCode.RESOURCE_NOT_FOUND;
-        return BaseResponse.error(errorCode);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public BaseResponse<Void> handleServerError() {
-        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+    @ExceptionHandler(CustomException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public BaseResponse<Void> handleCustomException(CustomException e) {
+        ErrorCode errorCode = e.getErrorCode();
         return BaseResponse.error(errorCode);
     }
 }
