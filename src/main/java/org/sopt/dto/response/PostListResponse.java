@@ -1,9 +1,9 @@
 package org.sopt.dto.response;
 
-public record PostResponse(
+public record PostListResponse(
     Long id,
     String title,
-    String content
+    String writerName
 ) {
 
 }

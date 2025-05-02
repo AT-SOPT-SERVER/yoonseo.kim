@@ -1,4 +1,7 @@
-package org.sopt.base;
+package org.sopt.global.common.base;
+
+import org.sopt.global.common.exception.ErrorCode;
+import org.sopt.global.common.response.SuccessCode;
 
 public class BaseResponse<T> {
     private final boolean success;
@@ -13,16 +16,12 @@ public class BaseResponse<T> {
         this.message = message;
     }
 
-    public static <T> BaseResponse<T> success(T data) {
-        return new BaseResponse<>(true, 200, data, "요청에 성공하였습니다.");
+    public static <T> BaseResponse<T> success(SuccessCode code, T data) {
+        return new BaseResponse<>(true, code.getStatus(), data, code.getMessage());
     }
 
-    public static <T> BaseResponse<T> success(int code, T data) {
-        return new BaseResponse<>(true, code, data, "요청에 성공하였습니다.");
-    }
-
-    public static <T> BaseResponse<T> error(int code, String message) {
-        return new BaseResponse<>(false, code, null, message);
+    public static <T> BaseResponse<T> error(ErrorCode code) {
+        return new BaseResponse<>(false, code.getStatus(), null, code.getMessage());
     }
 
     public boolean isSuccess() {

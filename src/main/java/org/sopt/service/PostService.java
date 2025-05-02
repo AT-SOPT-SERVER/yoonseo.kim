@@ -2,9 +2,14 @@ package org.sopt.service;
 
 import jakarta.transaction.Transactional;
 import org.sopt.domain.Post;
-import org.sopt.dto.response.PostResponse;
+import org.sopt.domain.User;
+import org.sopt.dto.request.PostRequest;
+import org.sopt.dto.response.PostDetailResponse;
+import org.sopt.dto.response.PostListResponse;
+import org.sopt.global.common.exception.CustomException;
+import org.sopt.global.common.exception.ErrorCode;
+import org.sopt.global.util.Validator;
 import org.sopt.repository.PostRepository;
-import org.sopt.util.Validator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,54 +18,86 @@ import java.util.stream.Collectors;
 @Service
 public class PostService {
     private final PostRepository postRepository;
+    private final UserService userService;
 
-    public PostService(PostRepository postRepository) {
+    public PostService(PostRepository postRepository, UserService userService) {
         this.postRepository = postRepository;
-    }
-
-    public void createPost(String title) {
-        Validator.validateTitle(title);
-        if (postRepository.existsByTitle(title)) {
-            throw new IllegalArgumentException("이미 존재하는 제목입니다.");
-        }
-        postRepository.save(new Post(title));
-    }
-
-    public List<PostResponse> getAllPosts() {
-        return postRepository.findAll().stream()
-                .map(post -> new PostResponse(post.getId(), post.getTitle()))
-                .collect(Collectors.toList());
-    }
-
-    public PostResponse getPostById(Long id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID입니다."));
-        return new PostResponse(post.getId(), post.getTitle());
+        this.userService = userService;
     }
 
     @Transactional
-    public void updatePost(Long id, String newTitle) {
-        Validator.validateTitle(newTitle);
-        if (postRepository.existsByTitle(newTitle)) {
-            throw new IllegalArgumentException("이미 존재하는 제목입니다.");
+    public void createPost(Long userId, PostRequest request) {
+        String title = request.title().trim();
+        String content = request.content().trim();
+
+        Validator.validateTitle(title);
+        Validator.validateContent(content);
+
+        if (postRepository.existsByTitle(title)) {
+            throw new CustomException(ErrorCode.DUPLICATE_POST_TITLE);
         }
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 ID입니다."));
-        post.setTitle(newTitle);
+
+        User writer = userService.findByIdOrThrow(userId);
+        Post post = new Post(title, content, writer);
+        postRepository.save(post);
     }
 
+    public List<PostListResponse> getAllPosts() {
+        return postRepository.findAllByOrderByIdDesc().stream()
+                .map(post -> new PostListResponse(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getUser().getName()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public PostDetailResponse getPostById(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+        return new PostDetailResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getUser().getName()
+        );
+    }
+
+    @Transactional
+    public void updatePost(Long id, PostRequest request) {
+        String newTitle = request.title().trim();
+        String newContent = request.content().trim();
+
+        Validator.validateTitle(newTitle);
+        Validator.validateContent(newContent);
+
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        if (postRepository.existsByTitleAndIdNot(newTitle, id)) {
+            throw new CustomException(ErrorCode.DUPLICATE_POST_TITLE);
+        }
+        post.setTitle(newTitle);
+        post.setContent(newContent);
+    }
+
+    @Transactional
     public void deletePost(Long id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("삭제할 게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_DELETE_NOT_FOUND));
         postRepository.delete(post);
     }
 
-    public List<PostResponse> searchPostsByKeyword(String keyword) {
+    public List<PostListResponse> searchPostsByKeyword(String keyword) {
         if (keyword == null || keyword.isBlank()) {
-            return List.of();
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
         }
         return postRepository.searchByKeyword(keyword.trim()).stream()
-                .map(post -> new PostResponse(post.getId(), post.getTitle()))
+                .map(post -> new PostListResponse(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getUser().getName()
+                ))
                 .collect(Collectors.toList());
     }
 }
