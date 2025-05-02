@@ -31,6 +31,12 @@ public final class Validator {
         }
     }
 
+    public static void validateUserName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new CustomException(ErrorCode.EMPTY_USER_NAME);
+        }
+    }
+
     private static int countGraphemeClusters(String text) {
         Matcher matcher = GRAPHEME_CLUSTER.matcher(text);
         int count = 0;
