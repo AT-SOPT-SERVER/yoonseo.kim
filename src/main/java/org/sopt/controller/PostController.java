@@ -1,7 +1,8 @@
 package org.sopt.controller;
 
 import org.sopt.dto.request.PostRequest;
-import org.sopt.dto.response.PostResponse;
+import org.sopt.dto.response.PostDetailResponse;
+import org.sopt.dto.response.PostListResponse;
 import org.sopt.global.common.base.BaseResponse;
 import org.sopt.global.common.response.SuccessCode;
 import org.sopt.service.PostService;
@@ -28,12 +29,12 @@ public class PostController {
     }
 
     @GetMapping
-    public BaseResponse<List<PostResponse>> getAllPosts() {
+    public BaseResponse<List<PostListResponse>> getAllPosts() {
         return BaseResponse.success(SuccessCode.GET_ALL_POSTS, postService.getAllPosts());
     }
 
     @GetMapping("/{postId}")
-    public BaseResponse<PostResponse> getPostById(@PathVariable final Long postId) {
+    public BaseResponse<PostDetailResponse> getPostById(@PathVariable final Long postId) {
         return BaseResponse.success(SuccessCode.GET_POST, postService.getPostById(postId));
     }
 
@@ -53,7 +54,7 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public BaseResponse<List<PostResponse>> searchPostsByKeyword(@RequestParam final String keyword) {
+    public BaseResponse<List<PostListResponse>> searchPostsByKeyword(@RequestParam final String keyword) {
         return BaseResponse.success(SuccessCode.SEARCH_POSTS, postService.searchPostsByKeyword(keyword));
     }
 }

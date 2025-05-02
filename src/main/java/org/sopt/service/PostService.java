@@ -4,7 +4,8 @@ import jakarta.transaction.Transactional;
 import org.sopt.domain.Post;
 import org.sopt.domain.User;
 import org.sopt.dto.request.PostRequest;
-import org.sopt.dto.response.PostResponse;
+import org.sopt.dto.response.PostDetailResponse;
+import org.sopt.dto.response.PostListResponse;
 import org.sopt.global.common.exception.CustomException;
 import org.sopt.global.common.exception.ErrorCode;
 import org.sopt.global.util.Validator;
@@ -26,34 +27,46 @@ public class PostService {
 
     @Transactional
     public void createPost(Long userId, PostRequest request) {
-        Validator.validateTitle(request.title());
-        Validator.validateContent(request.content());
+        String title = request.title().trim();
+        String content = request.content().trim();
 
-        if (postRepository.existsByTitle(request.title())) {
+        Validator.validateTitle(title);
+        Validator.validateContent(content);
+
+        if (postRepository.existsByTitle(title)) {
             throw new CustomException(ErrorCode.DUPLICATE_POST_TITLE);
         }
 
         User writer = userService.findByIdOrThrow(userId);
-        Post post = new Post(request.title(), request.content(), writer);
+        Post post = new Post(title, content, writer);
         postRepository.save(post);
     }
 
-    public List<PostResponse> getAllPosts() {
-        return postRepository.findAll().stream()
-                .map(post -> new PostResponse(post.getId(), post.getTitle(), post.getContent()))
+    public List<PostListResponse> getAllPosts() {
+        return postRepository.findAllByOrderByIdDesc().stream()
+                .map(post -> new PostListResponse(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getUser().getName()
+                ))
                 .collect(Collectors.toList());
     }
 
-    public PostResponse getPostById(Long id) {
+    public PostDetailResponse getPostById(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-        return new PostResponse(post.getId(), post.getTitle(), post.getContent());
+        return new PostDetailResponse(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getUser().getName()
+        );
     }
 
     @Transactional
     public void updatePost(Long id, PostRequest request) {
-        String newTitle = request.title();
-        String newContent = request.content();
+        String newTitle = request.title().trim();
+        String newContent = request.content().trim();
 
         Validator.validateTitle(newTitle);
         Validator.validateContent(newContent);
@@ -75,12 +88,16 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    public List<PostResponse> searchPostsByKeyword(String keyword) {
+    public List<PostListResponse> searchPostsByKeyword(String keyword) {
         if (keyword == null || keyword.isBlank()) {
             throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
         }
         return postRepository.searchByKeyword(keyword.trim()).stream()
-                .map(post -> new PostResponse(post.getId(), post.getTitle(), post.getContent()))
+                .map(post -> new PostListResponse(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getUser().getName()
+                ))
                 .collect(Collectors.toList());
     }
 }
